@@ -32,6 +32,22 @@ void Detector::scan(const cv::Mat image, std::vector<cv::Rect> detections)
     }
 
     //TODO integrate all detected ROIs as explained in Viola and Jones' 2004 paper (section 5.6).
+    for(int i = 0; i < detections.size(); ++i)
+    {
+        for(int j = i; j < detections.size(); )
+        {
+            if (detections[i] & detections[j])
+            {
+                detections[i].x = (detections[i].x + detections[j].x) / 2;
+                detections[i].y = (detections[i].y + detections[j].y) / 2;
+                detections.erase(detections.begin() + j);
+            }
+            else
+            {
+                ++j;
+            }
+        }
+    }
 }
 
 
