@@ -1,6 +1,7 @@
+#include "haarwaveletutilities.h"
+
 #include <iostream>
 #include <fstream>
-#include "haarwaveletutilities.h"
 
 
 
