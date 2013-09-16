@@ -50,7 +50,22 @@ public:
     /**
      * Sets the values of the single rectangle feature space.
      */
-    void srfs(std::vector<float> &srfsVector) const;
+    template <typename floating_point_type>
+    void srfs(std::vector<floating_point_type> &srfsVector) const
+    {
+        assert(sum && squareSum); //TODO convert into exception?
+
+        const int dim = dimensions();
+        for (int i = 0; i < dim; ++i)
+        {
+            srfsVector[i] = singleRectangleValue(rects[i], *sum);
+
+            //SRFS works with normalized means (Pavani et al., 2010, section 2.3).
+            //AFAIK, Pavani's classifier only normalized things by the maximum numeric value of each pixel.
+            //Viola and Jones perform a variance normalization.
+            srfsVector[i] /= (rects[i].size().height * rects[i].size().width * std::numeric_limits<unsigned char>::max());
+        }
+    }
 
     /**
      * Writes this Haar wavelet into the given std::ostream.

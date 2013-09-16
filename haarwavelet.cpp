@@ -84,29 +84,12 @@ float HaarWavelet::value() const
     const int dim = dimensions();
     for (int i = 0; i < dim; ++i)
     {
-        float rectValue = singleRectangleValue(rects[i], *sum);
+        const float rectValue = singleRectangleValue(rects[i], *sum);
         returnValue += (weights[i] * rectValue);
     }
 
-    return returnValue;
+    return returnValue / std::numeric_limits<unsigned char>::max();
 }
-
-void HaarWavelet::srfs(std::vector<float> &srfsVector) const
-{
-    assert(sum && squareSum); //TODO convert into exception?
-
-    const int dim = dimensions();
-    for (int i = 0; i < dim; ++i)
-    {
-        srfsVector[i] = singleRectangleValue(rects[i], *sum);
-
-        //SRFS works with normalized means (Pavani et al., 2010, section 2.3).
-        //AFAIK, Pavani's classifier only normalized things by the maximum numeric value of each pixel.
-        //Viola and Jones perform a variance normalization.
-        srfsVector[i] /= (rects[i].size().height * rects[i].size().width * std::numeric_limits<unsigned char>::max());
-    }
-}
-
 
 /**
  * See also constructor that takes a std::istream.
@@ -121,7 +104,7 @@ bool HaarWavelet::write(std::ostream &output) const
     output << dimensions() << ' ';
 
     bool first = true;
-    for (int i = 0; i < dimensions(); i++)
+    for (unsigned int i = 0; i < dimensions(); i++)
     {
         if (first)
         {
