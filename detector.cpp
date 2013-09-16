@@ -5,6 +5,8 @@
 Detector::Detector() : baseSize(PAVANI_BASE_SIZE),
     scalingFactor(DEFAULT_SCALING_FACTOR) {}
 
+
+
 void Detector::scan(const cv::Mat image, std::vector<cv::Rect> detections)
 {
     float currentScale = 1;      //the current scaling factor in use.
@@ -19,8 +21,17 @@ void Detector::scan(const cv::Mat image, std::vector<cv::Rect> detections)
         {
             cv::integral(image, integralImage);
             currentIntegralImage = image(currentRoi);
+
+            //deliver to the cascade of classifiers (or the strongclassifier) the integral image
+            int classification;
+            if (classification)
+            {
+                detections.push_back(currentRoi);
+            }
         }
     }
+
+    //TODO integrate all detected ROIs as explained in Viola and Jones' 2004 paper (section 5.6).
 }
 
 

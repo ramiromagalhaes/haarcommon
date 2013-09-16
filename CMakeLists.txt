@@ -11,8 +11,7 @@ find_package( OpenCV REQUIRED COMPONENTS core imgproc highgui)
 # include_directories(/home/ramiro/workspace/oiio/dist/linux64.debug/include)
 # link_directories(/home/ramiro/workspace/oiio/dist/linux64.debug/lib)
 
-set(source_files constants.h
-                 haarwavelet.h
+set(source_files haarwavelet.h
                  haarwavelet.cpp
                  haarwaveletutilities.h
                  haarwaveletutilities.cpp
