@@ -11,7 +11,8 @@ find_package( OpenCV REQUIRED COMPONENTS core imgproc highgui)
 # include_directories(/home/ramiro/workspace/oiio/dist/linux64.debug/include)
 # link_directories(/home/ramiro/workspace/oiio/dist/linux64.debug/lib)
 
-set(source_files haarwavelet.h
+set(source_files constants.h
+                 haarwavelet.h
                  haarwavelet.cpp
                  haarwaveletutilities.h
                  haarwaveletutilities.cpp
@@ -19,3 +20,6 @@ set(source_files haarwavelet.h
                  detector.cpp)
 add_library( haarcommon STATIC ${source_files} )
 target_link_libraries( haarcommon ${OpenCV_LIBS} )
+
+add_executable( detector main.cpp )
+target_link_libraries( detector haarcommon ${OpenCV_LIBS} ${Boost_LIBRARIES} )
