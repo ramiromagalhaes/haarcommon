@@ -74,7 +74,6 @@ bool HaarWavelet::setIntegralImages(cv::Mat * const sum_, cv::Mat * const square
     return true;
 }
 
-//TODO Should the normalization happen here?
 float HaarWavelet::value() const
 {
     assert(sum && squareSum); //TODO convert into exception?
@@ -84,8 +83,8 @@ float HaarWavelet::value() const
     const int dim = dimensions();
     for (int i = 0; i < dim; ++i)
     {
-        const float rectValue = singleRectangleValue(rects[i], *sum);
-        returnValue += (weights[i] * rectValue);
+        const float meanRectValue = singleRectangleValue(rects[i], *sum) / rects[i].area();
+        returnValue += (weights[i] * meanRectValue);
     }
 
     return returnValue / std::numeric_limits<unsigned char>::max();
