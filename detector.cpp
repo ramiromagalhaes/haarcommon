@@ -36,6 +36,7 @@ void Detector::scan(const cv::Mat image, std::vector<cv::Rect> detections)
     {
         for(int j = i; j < detections.size(); )
         {
+            /*
             if (detections[i] & detections[j])
             {
                 detections[i].x = (detections[i].x + detections[j].x) / 2;
@@ -46,6 +47,7 @@ void Detector::scan(const cv::Mat image, std::vector<cv::Rect> detections)
             {
                 ++j;
             }
+            */
         }
     }
 }
