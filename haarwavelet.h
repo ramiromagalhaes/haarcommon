@@ -4,68 +4,62 @@
 #include <vector>
 #include <iostream>
 
-
 #include <opencv2/core/core.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 
-class Detector;
+
 
 /**
  * @brief The HaarWavelet class represents a single Haar wavelet.
-  */
+ */
 class HaarWavelet
 {
 public:
 
     /**
-     * "Raw" constructor for a Haar wavelet.
+     * Constructs an "empty" instance of this object.
      */
-    HaarWavelet(cv::Size * const detectorSize_, std::vector<cv::Rect> rects_, std::vector<float> weights_);
+    HaarWavelet();
 
     /**
-     * Constructs a Haar wavelet by reading a input stream.
+     * "Raw" constructor for a Haar wavelet.
      */
-    HaarWavelet(cv::Size * const detectorSize_, std::istream & input);
+    HaarWavelet(std::vector<cv::Rect> rects_, std::vector<float> weights_);
 
     /**
      * Amount of rectangles this Haar wavelet has
      */
     unsigned int dimensions() const;
 
-    //void setDetector(Detector * d_);
-    //bool setPosition(cv::Point * pt);
-
     /**
-     * Sets the integral images this Haar Wavelet will use to calculate values. It must receive the
-     * reference to the values of the rectangular section over which the Detector is currently
-     * iterating over.
+     * Returns the value of this Haar wavelet when applied to an image in a certain position.
      */
-    bool setIntegralImages(cv::Mat * const sum_, cv::Mat * const squareSum_/*, cv::Mat * tilted*/); //TODO tilted wavelet
-
-    /**
-     * Returns the value of this Haar wavelet when applied to an image in a certain position
-     */
-    float value() const;
+    float value(const cv::Mat & sum, const cv::Mat & squareSum/*, const cv::Mat & tilted*/) const;
 
     /**
      * Sets the values of the single rectangle feature space.
      */
     template <typename floating_point_type>
-    void srfs(std::vector<floating_point_type> &srfsVector) const
+    void srfs(const cv::Mat & sum, const cv::Mat & squareSum/*, const cv::Mat & tilted*/, std::vector<floating_point_type> &srfsVector) const
     {
-        assert(sum && squareSum); //TODO convert into exception?
+        assert(sum.data && squareSum.data); //TODO convert into exception?
 
         const int dim = dimensions();
         for (int i = 0; i < dim; ++i)
         {
-            srfsVector[i] = singleRectangleValue(rects[i], *sum);
+            srfsVector[i] = singleRectangleValue(rects[i], sum);
 
             //SRFS works with normalized means (Pavani et al., 2010, section 2.3).
             //AFAIK, Pavani's classifier only normalized things by the maximum numeric value of each pixel.
             //Viola and Jones perform a variance normalization.
-            srfsVector[i] /= (rects[i].size().height * rects[i].size().width * std::numeric_limits<unsigned char>::max());
+            srfsVector[i] /= (((floating_point_type)rects[i].area()) * std::numeric_limits<unsigned char>::max());
         }
     }
+
+    /**
+     * Reads som data and sets this HaarWavelet with it.
+     */
+    bool read(std::istream &input);
 
     /**
      * Writes this Haar wavelet into the given std::ostream.
@@ -98,22 +92,16 @@ public:
     const std::vector<float>::const_iterator weights_end() const;
 
     /**
-     * Returns the weight applied to a rectangle at position 'index'.
+     * Returns the weight applied to the index'th rectangle.
      */
     float weight(const int index) const;
 
     /**
-     * Changes the value of the weight applied to a rectangle at position 'index' of the list of rectangles.
+     * Changes the value of the weight applied to the index'th rectangle.
      */
     void weight(const int index, const float new_value);
 
 protected:
-    /**
-     * Constructs an "empty" instance of this object.
-     */
-    HaarWavelet();
-
-private:
 
     /**
      * Calculates the sum of pixels inside a rectangular area of the image.
@@ -130,25 +118,6 @@ private:
      *If scale > 1, the Haar wavelet streaches right and down
      */
     float scale;
-
-    /**
-     * Integral images: both simple sum and square sum. The Haar wavelet only receives the reference
-     * to the values of the rectangular section over which the Detector is currently iterating over.
-     */
-    cv::Mat * sum,
-            * squareSum;
-    //TODO rotated sum and square sum
-
-    /**
-     *Size of the detector window
-     */
-    cv::Size * const detectorSize; //TODO is this really necessary? Currently it is only used in sanity checks.
-                                   //The size and scale can be gathered from the Detector.
-
-    /**
-     *Holds a reference for the detector that owns this Haar wavelet.
-     */
-    Detector * const detector;
 };
 
 #endif // HAARWAVELET_H

@@ -4,18 +4,11 @@
 
 
 
-HaarWavelet::HaarWavelet() : scale(1),
-                             detectorSize(0),
-                             detector(0)
-{
-}
+HaarWavelet::HaarWavelet() : scale(1) {}
 
 //TODO verify if all rects_ are under the detector size boundaries...
-HaarWavelet::HaarWavelet(cv::Size * const detectorSize_,
-                         std::vector<cv::Rect> rects_,
-                         std::vector<float> weights_) : scale(1),
-                                                        detectorSize(detectorSize_),
-                                                        detector(0)
+HaarWavelet::HaarWavelet(std::vector<cv::Rect> rects_,
+                         std::vector<float> weights_) : scale(1)
 {
     assert(rects.size() == weights.size()); //TODO convert into exception
 
@@ -23,15 +16,28 @@ HaarWavelet::HaarWavelet(cv::Size * const detectorSize_,
     weights = weights_;
 }
 
-/*
- * Sample wavelet data
- * rects x1 y1 w1 h1 w1 x2 y2 w2 h2 w2...
- *
- */
-HaarWavelet::HaarWavelet(cv::Size * const detectorSize_,
-                         std::istream & input) : scale(1),
-                                                 detectorSize(detectorSize_),
-                                                 detector(0)
+unsigned int HaarWavelet::dimensions() const
+{
+    return (int)rects.size();
+}
+
+float HaarWavelet::value(const cv::Mat & sum, const cv::Mat & squareSum) const
+{
+    assert(sum.data && squareSum.data); //TODO convert into exception
+
+    float returnValue = 0;
+
+    const int dim = dimensions();
+    for (int i = 0; i < dim; ++i)
+    {
+        const float meanRectValue = singleRectangleValue(rects[i], sum) / rects[i].area();
+        returnValue += (weights[i] * meanRectValue);
+    }
+
+    return returnValue / std::numeric_limits<unsigned char>::max();
+}
+
+bool HaarWavelet::read(std::istream &input)
 {
     int rectangles;
     input >> rectangles;
@@ -51,43 +57,7 @@ HaarWavelet::HaarWavelet(cv::Size * const detectorSize_,
         weights.push_back(weight_);
     }
 
-}
-
-unsigned int HaarWavelet::dimensions() const
-{
-    return (int)rects.size();
-}
-
-bool HaarWavelet::setIntegralImages(cv::Mat * const sum_, cv::Mat * const squareSum_)
-{
-    if ( !sum_
-            || !squareSum_
-            || sum_->cols < detectorSize->width
-            || sum_->rows < detectorSize->height)
-    {
-        return false;
-    }
-
-    sum = sum_;
-    squareSum = squareSum_;
-
     return true;
-}
-
-float HaarWavelet::value() const
-{
-    assert(sum && squareSum); //TODO convert into exception?
-
-    float returnValue = 0;
-
-    const int dim = dimensions();
-    for (int i = 0; i < dim; ++i)
-    {
-        const float meanRectValue = singleRectangleValue(rects[i], *sum) / rects[i].area();
-        returnValue += (weights[i] * meanRectValue);
-    }
-
-    return returnValue / std::numeric_limits<unsigned char>::max();
 }
 
 /**
@@ -158,8 +128,13 @@ void HaarWavelet::weight(const int index, const float new_value)
     weights[index] = new_value;
 }
 
-float HaarWavelet::singleRectangleValue(const cv::Rect &r, const cv::Mat &s) const
+float HaarWavelet::singleRectangleValue(const cv::Rect &r, const cv::Mat & s) const
 {
+    if (s.type() != cv::DataType<double>::type)
+    {
+        throw 31;
+    }
+
     float rectVal = 0;
 
     //As per Lienhart, Maydt, 2002, section 2.2

@@ -5,7 +5,7 @@
 
 
 
-bool loadHaarWavelets(cv::Size * const sampleSize, const std::string &filename, std::vector<HaarWavelet *> & wavelets)
+bool loadHaarWavelets(const std::string &filename, std::vector<HaarWavelet> & wavelets)
 {
     std::ifstream ifs;
     ifs.open(filename.c_str(), std::ifstream::in);
@@ -17,7 +17,8 @@ bool loadHaarWavelets(cv::Size * const sampleSize, const std::string &filename, 
 
     do
     {
-        HaarWavelet * wavelet = new HaarWavelet(sampleSize, ifs);
+        HaarWavelet wavelet;
+        wavelet.read(ifs);
         if ( !ifs.eof() )
         {
             wavelets.push_back(wavelet);
@@ -35,7 +36,7 @@ bool loadHaarWavelets(cv::Size * const sampleSize, const std::string &filename, 
 
 
 
-bool writeHaarWavelets(const char * filename, const std::vector<HaarWavelet * > &wavelets)
+bool writeHaarWavelets(const char * filename, const std::vector<HaarWavelet> &wavelets)
 {
     std::ofstream ofs;
     ofs.open(filename, std::ofstream::out | std::ofstream::trunc);
@@ -45,11 +46,11 @@ bool writeHaarWavelets(const char * filename, const std::vector<HaarWavelet * > 
         return false;
     }
 
-    std::vector<HaarWavelet * >::const_iterator it = wavelets.begin();
-    const std::vector<HaarWavelet * >::const_iterator end = wavelets.end();
+    std::vector<HaarWavelet>::const_iterator it = wavelets.begin();
+    const std::vector<HaarWavelet>::const_iterator end = wavelets.end();
     for(; it != end; ++it)
     {
-        (*it)->write(ofs);
+        it->write(ofs);
         ofs << '\n';
     }
     ofs.close();

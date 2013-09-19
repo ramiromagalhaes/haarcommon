@@ -19,7 +19,7 @@ void Detector::scan(const cv::Mat image, std::vector<cv::Rect> detections)
     {
         for(int h = 0; h < image.rows - currentRoi.height; ++h)
         {
-            cv::integral(image, integralImage);
+            cv::integral(image, integralImage, cv::DataType<double>::type);
             currentIntegralImage = image(currentRoi);
 
             //deliver to the cascade of classifiers (or the strongclassifier) the integral image
@@ -32,9 +32,9 @@ void Detector::scan(const cv::Mat image, std::vector<cv::Rect> detections)
     }
 
     //TODO integrate all detected ROIs as explained in Viola and Jones' 2004 paper (section 5.6).
-    for(int i = 0; i < detections.size(); ++i)
+    for(unsigned int i = 0; i < detections.size(); ++i)
     {
-        for(int j = i; j < detections.size(); )
+        for(unsigned int j = i; j < detections.size(); )
         {
             /*
             if (detections[i] & detections[j])

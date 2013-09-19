@@ -19,6 +19,3 @@ set(source_files haarwavelet.h
                  detector.cpp)
 add_library( haarcommon STATIC ${source_files} )
 target_link_libraries( haarcommon ${OpenCV_LIBS} )
-
-add_executable( detector main.cpp )
-target_link_libraries( detector haarcommon ${OpenCV_LIBS} ${Boost_LIBRARIES} )
