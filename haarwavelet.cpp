@@ -6,20 +6,22 @@
 
 HaarWavelet::HaarWavelet() : scale(1) {}
 
-//TODO verify if all rects_ are under the detector size boundaries...
 HaarWavelet::HaarWavelet(std::vector<cv::Rect> rects_,
                          std::vector<float> weights_) : scale(1)
 {
     assert(rects.size() == weights.size()); //TODO convert into exception
-
     rects = rects_;
     weights = weights_;
 }
+
+
 
 unsigned int HaarWavelet::dimensions() const
 {
     return (int)rects.size();
 }
+
+
 
 float HaarWavelet::value(const cv::Mat & sum, const cv::Mat & squareSum) const
 {
@@ -36,6 +38,8 @@ float HaarWavelet::value(const cv::Mat & sum, const cv::Mat & squareSum) const
 
     return returnValue / std::numeric_limits<unsigned char>::max();
 }
+
+
 
 bool HaarWavelet::read(std::istream &input)
 {
@@ -59,6 +63,8 @@ bool HaarWavelet::read(std::istream &input)
 
     return true;
 }
+
+
 
 /**
  * See also constructor that takes a std::istream.
@@ -93,6 +99,8 @@ bool HaarWavelet::write(std::ostream &output) const
     return true;
 }
 
+
+
 std::vector<cv::Rect>::const_iterator HaarWavelet::rects_begin() const
 {
     return rects.begin();
@@ -107,6 +115,8 @@ const cv::Rect HaarWavelet::rect(const int index) const
 {
     return rects[index];
 }
+
+
 
 std::vector<float>::const_iterator HaarWavelet::weights_begin() const
 {
@@ -128,6 +138,8 @@ void HaarWavelet::weight(const int index, const float new_value)
     weights[index] = new_value;
 }
 
+
+
 float HaarWavelet::singleRectangleValue(const cv::Rect &r, const cv::Mat & s) const
 {
     if (s.type() != cv::DataType<double>::type)
@@ -141,7 +153,7 @@ float HaarWavelet::singleRectangleValue(const cv::Rect &r, const cv::Mat & s) co
     const int x_w = r.x + r.width;
     const int y_h = r.y + r.height;
 
-    //TODO is there a faster implementation that avoids invoking s.at() functions? Maybe a pointer to the data? Check Mat::step1()
+    //TODO is there a faster implementation that avoids invoking s.at() functions?
     rectVal = s.at<double>(r.y, r.x)     // (x,     y)
                 - s.at<double>(r.y, x_w) // (x + w, y)
                 - s.at<double>(y_h, r.x) // (x,     y + h)
