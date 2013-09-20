@@ -36,10 +36,10 @@ bool loadHaarWavelets(const std::string &filename, std::vector<HaarWavelet> & wa
 
 
 
-bool writeHaarWavelets(const char * filename, const std::vector<HaarWavelet> &wavelets)
+bool writeHaarWavelets(const std::string &filename, const std::vector<HaarWavelet> &wavelets)
 {
     std::ofstream ofs;
-    ofs.open(filename, std::ofstream::out | std::ofstream::trunc);
+    ofs.open(filename.c_str(), std::ofstream::out | std::ofstream::trunc);
 
     if (!ofs.is_open())
     {
