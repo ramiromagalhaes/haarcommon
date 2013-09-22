@@ -23,7 +23,8 @@ unsigned int HaarWavelet::dimensions() const
 
 
 
-float HaarWavelet::value(const cv::Mat & sum, const cv::Mat & squareSum) const
+//TODO Write documentation about how one should extract rois from the image
+float HaarWavelet::value(const cv::Mat & sum, const cv::Mat & squareSum, const float scale) const
 {
     assert(sum.data && squareSum.data); //TODO convert into exception
 
@@ -32,7 +33,13 @@ float HaarWavelet::value(const cv::Mat & sum, const cv::Mat & squareSum) const
     const int dim = dimensions();
     for (int i = 0; i < dim; ++i)
     {
-        const float meanRectValue = singleRectangleValue(rects[i], sum) / rects[i].area();
+        cv::Rect r = rects[i];
+        r.x *= scale;
+        r.y *= scale;
+        r.height *= scale;
+        r.width  *= scale;
+
+        const float meanRectValue = singleRectangleValue(r, sum) / r.area();
         returnValue += (weights[i] * meanRectValue);
     }
 

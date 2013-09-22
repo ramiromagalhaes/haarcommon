@@ -34,20 +34,25 @@ public:
     /**
      * Returns the value of this Haar wavelet when applied to an image in a certain position.
      */
-    float value(const cv::Mat & sum, const cv::Mat & squareSum/*, const cv::Mat & tilted*/) const;
+    float value(const cv::Mat & sum, const cv::Mat & squareSum/*, const cv::Mat & tilted*/, const float scale = 1.0f) const;
 
     /**
      * Sets the values of the single rectangle feature space.
      */
     template <typename floating_point_type>
-    void srfs(const cv::Mat & sum, const cv::Mat & squareSum/*, const cv::Mat & tilted*/, std::vector<floating_point_type> &srfsVector) const
+    void srfs(const cv::Mat & sum, const cv::Mat & squareSum/*, const cv::Mat & tilted*/, std::vector<floating_point_type> &srfsVector, const float scale = 1.0f) const
     {
         assert(sum.data && squareSum.data); //TODO convert into exception?
 
         const int dim = dimensions();
         for (int i = 0; i < dim; ++i)
         {
-            srfsVector[i] = singleRectangleValue(rects[i], sum);
+            cv::Rect r = rects[i];
+            r.x *= scale;
+            r.y *= scale;
+            r.height *= scale;
+            r.width  *= scale;
+            srfsVector[i] = singleRectangleValue(r, sum);
 
             //SRFS works with normalized means (Pavani et al., 2010, section 2.3).
             //AFAIK, Pavani's classifier only normalized things by the maximum numeric value of each pixel.
