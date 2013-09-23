@@ -33,11 +33,13 @@ public:
 
     /**
      * Returns the value of this Haar wavelet when applied to an image in a certain position.
+     * If scale > 1, the Haar wavelet streaches right and down.
      */
     float value(const cv::Mat & sum, const cv::Mat & squareSum/*, const cv::Mat & tilted*/, const float scale = 1.0f) const;
 
     /**
      * Sets the values of the single rectangle feature space.
+     * If scale > 1, the Haar wavelet streaches right and down.
      */
     template <typename floating_point_type>
     void srfs(const cv::Mat & sum, const cv::Mat & squareSum/*, const cv::Mat & tilted*/, std::vector<floating_point_type> &srfsVector, const float scale = 1.0f) const
@@ -118,11 +120,24 @@ protected:
      */
     std::vector<cv::Rect> rects;
     std::vector<float> weights;
+};
+
+
+
+class ViolaJonesHaarWavelet : public HaarWavelet
+{
+public:
 
     /**
-     *If scale > 1, the Haar wavelet streaches right and down
+     * Returns the value of this Haar wavelet when applied to an image in a certain position.
+     * If scale > 1, the Haar wavelet streaches right and down.
+     *
+     * The only normalization mentioned in Pavani et al. is the "intensity normalization" (section 2.3).
+     * Viola and Jones perform a variance normalization that might be more resilient to lightning conditions.
+     * This function implements what Viola and Jones did.
      */
-    float scale;
+    float value(const cv::Mat & sum, const cv::Mat & squareSum/*, const cv::Mat & tilted*/, const float scale = 1.0f) const;
+
 };
 
 #endif // HAARWAVELET_H

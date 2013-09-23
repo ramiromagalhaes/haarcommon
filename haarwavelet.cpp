@@ -4,10 +4,10 @@
 
 
 
-HaarWavelet::HaarWavelet() : scale(1) {}
+HaarWavelet::HaarWavelet() {}
 
 HaarWavelet::HaarWavelet(std::vector<cv::Rect> rects_,
-                         std::vector<float> weights_) : scale(1)
+                         std::vector<float> weights_)
 {
     assert(rects.size() == weights.size()); //TODO convert into exception
     rects = rects_;
@@ -167,4 +167,37 @@ float HaarWavelet::singleRectangleValue(const cv::Rect &r, const cv::Mat & s) co
                 + s.at<double>(y_h, x_w);// (x + w, y + h)
 
     return rectVal;
+}
+
+
+
+//======================================== ViolaJonesHaarWavelet ========================================
+
+
+
+float ViolaJonesHaarWavelet::value(const cv::Mat &sum, const cv::Mat &squareSum, const float scale) const
+{
+    assert(sum.data && squareSum.data); //TODO convert into exception
+
+    const cv::Rect all(0, 0, sum.cols, sum.rows);
+    const float area = (sum.cols - 1) * (sum.rows - 1); //Area of the image. We use minus 1 because the original
+                                                        //image is 1 height and width smaller than the integrals.
+
+    const float mean = singleRectangleValue( all, sum ) / area;
+    const float stdDev = std::sqrt(mean * mean - singleRectangleValue(all, squareSum) / area);
+
+    float returnValue = 0;
+    const int dim = dimensions();
+    for (int i = 0; i < dim; ++i)
+    {
+        cv::Rect r = rects[i];
+        r.x *= scale;
+        r.y *= scale;
+        r.height *= scale;
+        r.width  *= scale;
+
+        returnValue += weights[i] * singleRectangleValue(r, sum);
+    }
+
+    return returnValue / stdDev;
 }
