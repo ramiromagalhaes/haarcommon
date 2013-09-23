@@ -184,7 +184,7 @@ float ViolaJonesHaarWavelet::value(const cv::Mat &sum, const cv::Mat &squareSum,
                                                         //image is 1 height and width smaller than the integrals.
 
     const float mean = singleRectangleValue( all, sum ) / area;
-    const float stdDev = std::sqrt(mean * mean - singleRectangleValue(all, squareSum) / area);
+    const float variance = mean * mean - singleRectangleValue(all, squareSum) / area;
 
     float returnValue = 0;
     const int dim = dimensions();
@@ -199,5 +199,5 @@ float ViolaJonesHaarWavelet::value(const cv::Mat &sum, const cv::Mat &squareSum,
         returnValue += weights[i] * singleRectangleValue(r, sum);
     }
 
-    return returnValue / stdDev;
+    return returnValue / variance;
 }
