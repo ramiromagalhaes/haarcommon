@@ -42,9 +42,9 @@ public:
      * If scale > 1, the Haar wavelet streaches right and down.
      */
     template <typename floating_point_type>
-    void srfs(const cv::Mat & sum, const cv::Mat & squareSum/*, const cv::Mat & tilted*/, std::vector<floating_point_type> &srfsVector, const float scale = 1.0f) const
+    void srfs(const cv::Mat & sum, std::vector<floating_point_type> &srfsVector, const float scale = 1.0f) const
     {
-        assert(sum.data && squareSum.data); //TODO convert into exception?
+        assert(sum.data); //TODO convert into exception?
 
         const int dim = dimensions();
         for (int i = 0; i < dim; ++i)
