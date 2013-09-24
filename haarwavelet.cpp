@@ -179,12 +179,13 @@ float ViolaJonesHaarWavelet::value(const cv::Mat &sum, const cv::Mat &squareSum,
 {
     assert(sum.data && squareSum.data); //TODO convert into exception
 
-    const cv::Rect all(0, 0, sum.cols, sum.rows);
-    const float area = (sum.cols - 1) * (sum.rows - 1); //Area of the image. We use minus 1 because the original
-                                                        //image is 1 height and width smaller than the integrals.
+    const cv::Rect all(0, 0, sum.cols - 1, sum.rows - 1);//This rect should wraps the whole original image
+                                                         //which is 1 px smaller than the summation matrices.
 
+    const float area = all.area();
     const float mean = singleRectangleValue( all, sum ) / area;
-    const float variance = mean * mean - singleRectangleValue(all, squareSum) / area;
+    //The variance calculation procedure mentioned in Viola Jones 2004 is wrong. This is the correct one.
+    const float stdDev = std::sqrt( (singleRectangleValue(all, squareSum) / area) - mean * mean );
 
     float returnValue = 0;
     const int dim = dimensions();
@@ -196,8 +197,9 @@ float ViolaJonesHaarWavelet::value(const cv::Mat &sum, const cv::Mat &squareSum,
         r.height *= scale;
         r.width  *= scale;
 
-        returnValue += weights[i] * singleRectangleValue(r, sum);
+        //Lienhart 2002 (section 2.3) mention they normalized things this way.
+        returnValue += weights[i] * (singleRectangleValue(r, sum) - mean * r.area()) / (2.0f * stdDev);
     }
 
-    return returnValue / variance;
+    return returnValue;
 }
