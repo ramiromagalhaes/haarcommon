@@ -1,7 +1,7 @@
 #include "haarwavelet.h"
 #include <cassert>
 #include <limits>
-
+#include <numeric>
 
 
 HaarWavelet::HaarWavelet() {}
@@ -167,6 +167,68 @@ float HaarWavelet::singleRectangleValue(const cv::Rect &r, const cv::Mat & s) co
                 + s.at<double>(y_h, x_w);// (x + w, y + h)
 
     return rectVal;
+}
+
+
+
+//======================================== MyHaarWavelet ========================================
+
+
+
+float MyHaarWavelet::value(const cv::Mat & sum, const cv::Mat & /*, const cv::Mat & tilted*/, const float scale) const
+{
+    const unsigned int dim = dimensions();
+
+    std::vector<float> s(dim);
+    srfs(sum, s, scale);
+
+    std::vector<float> s_minus_mean(dim);
+    std::transform(s.begin(), s.end(),
+                   means.begin(),
+                   s_minus_mean.begin(),
+                   std::minus<float>());
+
+    //TODO try this harder: std::inner_product( s_minus_mean.begin(), weights.begin(), .0f );
+    float inner_product = 0;
+    for (unsigned int i = 0; i < dim; ++i)
+    {
+        inner_product += s_minus_mean[i] * weights[i];
+    }
+
+    return inner_product;
+}
+
+
+
+bool MyHaarWavelet::read(std::istream &input)
+{
+    if ( !HaarWavelet::read(input) )
+    {
+        return false;
+    }
+
+    means.resize(dimensions());
+    for (unsigned int i = 0; i < dimensions(); i++)
+    {
+        input >> means[i];
+    }
+
+    return true;
+}
+
+bool MyHaarWavelet::write(std::ostream &output) const
+{
+    if ( !HaarWavelet::write(output) )
+    {
+        return false;
+    }
+
+    for (unsigned int i = 0; i < dimensions(); i++)
+    {
+        output << ' ' << means[i];
+    }
+
+    return true;
 }
 
 

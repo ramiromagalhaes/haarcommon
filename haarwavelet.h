@@ -124,6 +124,32 @@ protected:
 
 
 
+class MyHaarWavelet : public HaarWavelet
+{
+public:
+
+    /**
+     * Returns the value of this Haar wavelet when applied to an image in a certain position.
+     * If scale > 1, the Haar wavelet streaches right and down.
+     */
+    float value(const cv::Mat & sum, const cv::Mat & squareSum/*, const cv::Mat & tilted*/, const float scale = 1.0f) const;
+
+    /**
+     * Reads som data and sets this HaarWavelet with it.
+     */
+    bool read(std::istream &input);
+
+    /**
+     * Writes this Haar wavelet into the given std::ostream.
+     */
+    bool write(std::ostream &output) const;
+
+protected:
+    std::vector<float> means;
+};
+
+
+
 class ViolaJonesHaarWavelet : public HaarWavelet
 {
 public:
