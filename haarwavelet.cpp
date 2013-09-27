@@ -195,7 +195,7 @@ float MyHaarWavelet::value(const cv::Mat & sum, const cv::Mat & /*, const cv::Ma
         inner_product += s_minus_mean[i] * weights[i];
     }
 
-    return inner_product;
+    return std::abs(inner_product);
 }
 
 
