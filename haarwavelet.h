@@ -129,6 +129,16 @@ class MyHaarWavelet : public HaarWavelet
 public:
 
     /**
+     * Constructs an "empty" instance of this object.
+     */
+    MyHaarWavelet();
+
+    /**
+     * "Raw" constructor for a Haar wavelet.
+     */
+    MyHaarWavelet(std::vector<cv::Rect> rects_, std::vector<float> weights_);
+
+    /**
      * Returns the value of this Haar wavelet when applied to an image in a certain position.
      * If scale > 1, the Haar wavelet streaches right and down.
      */

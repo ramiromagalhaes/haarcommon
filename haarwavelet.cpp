@@ -175,6 +175,12 @@ float HaarWavelet::singleRectangleValue(const cv::Rect &r, const cv::Mat & s) co
 
 
 
+MyHaarWavelet::MyHaarWavelet() : HaarWavelet() {}
+
+MyHaarWavelet::MyHaarWavelet(std::vector<cv::Rect> rects_, std::vector<float> weights_) : HaarWavelet(rects_, weights_) {}
+
+
+
 float MyHaarWavelet::value(const cv::Mat & sum, const cv::Mat & /*, const cv::Mat & tilted*/, const float scale) const
 {
     const unsigned int dim = dimensions();
