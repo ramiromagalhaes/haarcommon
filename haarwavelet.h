@@ -32,48 +32,6 @@ public:
     unsigned int dimensions() const;
 
     /**
-     * Returns the value of this Haar wavelet when applied to an image in a certain position.
-     * If scale > 1, the Haar wavelet streaches right and down.
-     */
-    float value(const cv::Mat & sum, const cv::Mat & squareSum/*, const cv::Mat & tilted*/, const float scale = 1.0f) const;
-
-    /**
-     * Sets the values of the single rectangle feature space.
-     * If scale > 1, the Haar wavelet streaches right and down.
-     */
-    template <typename floating_point_type>
-    void srfs(const cv::Mat & sum, std::vector<floating_point_type> &srfsVector, const float scale = 1.0f) const
-    {
-        assert(sum.data); //TODO convert into exception?
-
-        const int dim = dimensions();
-        for (int i = 0; i < dim; ++i)
-        {
-            cv::Rect r = rects[i];
-            r.x *= scale;
-            r.y *= scale;
-            r.height *= scale;
-            r.width  *= scale;
-            srfsVector[i] = singleRectangleValue(r, sum);
-
-            //SRFS works with normalized means (Pavani et al., 2010, section 2.3).
-            //AFAIK, Pavani's classifier only normalized things by the maximum numeric value of each pixel.
-            //Viola and Jones perform a variance normalization.
-            srfsVector[i] /= (((floating_point_type)rects[i].area()) * std::numeric_limits<unsigned char>::max());
-        }
-    }
-
-    /**
-     * Reads som data and sets this HaarWavelet with it.
-     */
-    bool read(std::istream &input);
-
-    /**
-     * Writes this Haar wavelet into the given std::ostream.
-     */
-    bool write(std::ostream &output) const;
-
-    /**
      * Returns a constant iterator to the start of a collection of rectangles that compose this wavelet.
      */
     std::vector<cv::Rect>::const_iterator rects_begin() const;
@@ -108,8 +66,48 @@ public:
      */
     void weight(const int index, const float new_value);
 
-protected:
+    /**
+     * Sets the values of the single rectangle feature space.
+     * If scale > 1, the Haar wavelet streaches right and down.
+     */
+    template <typename floating_point_type>
+    void srfs(const cv::Mat & sum, std::vector<floating_point_type> &srfsVector, const float scale = 1.0f) const
+    {
+        assert(sum.data); //TODO convert into exception?
 
+        const int dim = dimensions();
+        for (int i = 0; i < dim; ++i)
+        {
+            cv::Rect r = rects[i];
+            r.x *= scale;
+            r.y *= scale;
+            r.height *= scale;
+            r.width  *= scale;
+
+            //SRFS works with normalized means (Pavani et al., 2010, section 2.3).
+            //AFAIK, Pavani's classifier only normalized pixel values by the maximum numeric value of each pixel.
+            //Viola and Jones perform a variance normalization.
+            srfsVector[i] = singleRectangleValue(r, sum) / ( rects[i].area() * std::numeric_limits<unsigned char>::max() );
+        }
+    }
+
+    /**
+     * Returns the value of this Haar wavelet when applied to an image in a certain position.
+     * If scale > 1, the Haar wavelet streaches right and down.
+     */
+    virtual float value(const cv::Mat & sum, const cv::Mat & squareSum/*, const cv::Mat & tilted*/, const float scale = 1.0f) const;
+
+    /**
+     * Reads som data and sets this HaarWavelet with it.
+     */
+    virtual bool read(std::istream &input);
+
+    /**
+     * Writes this Haar wavelet into the given std::ostream.
+     */
+    virtual bool write(std::ostream &output) const;
+
+protected:
     /**
      * Calculates the sum of pixels inside a rectangular area of the image.
      */
@@ -175,5 +173,43 @@ public:
     float value(const cv::Mat & sum, const cv::Mat & squareSum/*, const cv::Mat & tilted*/, const float scale = 1.0f) const;
 
 };
+
+
+
+class ViolaJonesNormalizedMyHaarWavelet : public MyHaarWavelet
+{
+public:
+
+    /**
+     * Returns the value of this Haar wavelet when applied to an image in a certain position.
+     * If scale > 1, the Haar wavelet streaches right and down.
+     *
+     * The only normalization mentioned in Pavani et al. is the "intensity normalization" (section 2.3).
+     * Viola and Jones perform a variance normalization that might be more resilient to lightning conditions.
+     * This function implements what Viola and Jones did.
+     */
+    float value(const cv::Mat & sum, const cv::Mat & squareSum/*, const cv::Mat & tilted*/, const float scale = 1.0f) const;
+
+};
+
+
+
+class ViolaJonesNormalizedPavaniHaarWavelet : public MyHaarWavelet
+{
+public:
+
+    /**
+     * Returns the value of this Haar wavelet when applied to an image in a certain position.
+     * If scale > 1, the Haar wavelet streaches right and down.
+     *
+     * The only normalization mentioned in Pavani et al. is the "intensity normalization" (section 2.3).
+     * Viola and Jones perform a variance normalization that might be more resilient to lightning conditions.
+     * This function implements what Viola and Jones did.
+     */
+    float value(const cv::Mat & sum, const cv::Mat & squareSum/*, const cv::Mat & tilted*/, const float scale = 1.0f) const;
+
+};
+
+
 
 #endif // HAARWAVELET_H

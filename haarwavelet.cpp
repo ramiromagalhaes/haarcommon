@@ -4,7 +4,10 @@
 #include <numeric>
 
 
+
 HaarWavelet::HaarWavelet() {}
+
+
 
 HaarWavelet::HaarWavelet(std::vector<cv::Rect> rects_,
                          std::vector<float> weights_)
@@ -40,7 +43,7 @@ float HaarWavelet::value(const cv::Mat & sum, const cv::Mat & squareSum, const f
         r.width  *= scale;
 
         const float meanRectValue = singleRectangleValue(r, sum) / r.area();
-        returnValue += (weights[i] * meanRectValue);
+        returnValue += weights[i] * meanRectValue;
     }
 
     return returnValue / std::numeric_limits<unsigned char>::max();
@@ -177,7 +180,10 @@ float HaarWavelet::singleRectangleValue(const cv::Rect &r, const cv::Mat & s) co
 
 MyHaarWavelet::MyHaarWavelet() : HaarWavelet() {}
 
-MyHaarWavelet::MyHaarWavelet(std::vector<cv::Rect> rects_, std::vector<float> weights_) : HaarWavelet(rects_, weights_) {}
+MyHaarWavelet::MyHaarWavelet(std::vector<cv::Rect> rects_, std::vector<float> weights_) : HaarWavelet(rects_, weights_)
+{
+    means.resize(rects_.size());
+}
 
 
 
@@ -261,6 +267,72 @@ float ViolaJonesHaarWavelet::value(const cv::Mat &sum, const cv::Mat &squareSum,
 
         //Lienhart 2002 (section 2.3) mention they normalized things this way.
         returnValue += weights[i] * (singleRectangleValue(r, sum) - mean * r.area()) / (2.0f * stdDev);
+    }
+
+    return returnValue;
+}
+
+
+
+//======================================== ViolaJonesNormalizedMyHaarWavelet ========================================
+
+
+
+float ViolaJonesNormalizedMyHaarWavelet::value(const cv::Mat &sum, const cv::Mat &squareSum, const float scale) const
+{
+    assert(sum.data && squareSum.data); //TODO convert into exception
+
+    const cv::Rect all(0, 0, sum.cols - 1, sum.rows - 1);
+    const float area = all.area();
+    const float mean = singleRectangleValue( all, sum ) / area;
+    const float stdDev = std::sqrt( (singleRectangleValue(all, squareSum) / area) - mean * mean );
+
+    float returnValue = 0;
+    const int dim = dimensions();
+    for (int i = 0; i < dim; ++i)
+    {
+        cv::Rect r = rects[i];
+        r.x *= scale;
+        r.y *= scale;
+        r.height *= scale;
+        r.width  *= scale;
+
+        //Normalized the rectangle value with Viola and Jones method than we bring the value back to the range 0 to 255.
+        float violaJonesNormalizedRectValue = (singleRectangleValue(r, sum) - mean * r.area()) / (2.0f * stdDev);
+        returnValue += weights[i] * (violaJonesNormalizedRectValue / r.area() - means[i]);
+    }
+
+    return returnValue;
+}
+
+
+
+//======================================== ViolaJonesNormalizedPavaniHaarWavelet ========================================
+
+
+
+float ViolaJonesNormalizedPavaniHaarWavelet::value(const cv::Mat &sum, const cv::Mat &squareSum, const float scale) const
+{
+    assert(sum.data && squareSum.data); //TODO convert into exception
+
+    const cv::Rect all(0, 0, sum.cols - 1, sum.rows - 1);
+    const float area = all.area();
+    const float mean = singleRectangleValue( all, sum ) / area;
+    const float stdDev = std::sqrt( (singleRectangleValue(all, squareSum) / area) - mean * mean );
+
+    float returnValue = 0;
+    const int dim = dimensions();
+    for (int i = 0; i < dim; ++i)
+    {
+        cv::Rect r = rects[i];
+        r.x *= scale;
+        r.y *= scale;
+        r.height *= scale;
+        r.width  *= scale;
+
+        //Normalized the rectangle value with Viola and Jones method than we bring the value back to the range 0 to 255.
+        float violaJonesNormalizedRectValue = (singleRectangleValue(r, sum) - mean * r.area()) / (2.0f * stdDev);
+        returnValue += weights[i] * violaJonesNormalizedRectValue / r.area();
     }
 
     return returnValue;
