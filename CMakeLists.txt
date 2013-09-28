@@ -13,7 +13,6 @@ find_package( OpenCV REQUIRED COMPONENTS core imgproc highgui)
 
 set(source_files haarwavelet.h
                  haarwavelet.cpp
-                 haarwaveletutilities.h
-                 haarwaveletutilities.cpp)
+                 haarwaveletutilities.h)
 add_library( haarcommon STATIC ${source_files} )
 target_link_libraries( haarcommon ${OpenCV_LIBS} )
