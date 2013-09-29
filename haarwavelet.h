@@ -67,65 +67,6 @@ public:
     void weight(const int index, const float new_value);
 
     /**
-     * Sets the values of the single rectangle feature space.
-     * If scale > 1, the Haar wavelet streaches right and down.
-     */
-    template <typename floating_point_type>
-    void srfs(const cv::Mat & sum, std::vector<floating_point_type> &srfsVector, const float scale = 1.0f) const
-    {
-        assert(sum.data); //TODO convert into exception?
-
-        const int dim = dimensions();
-        for (int i = 0; i < dim; ++i)
-        {
-            cv::Rect r = rects[i];
-            r.x *= scale;
-            r.y *= scale;
-            r.height *= scale;
-            r.width  *= scale;
-
-            //SRFS works with normalized means (Pavani et al., 2010, section 2.3).
-            //AFAIK, Pavani's classifier only normalized pixel values by the maximum numeric value of each pixel.
-            //Viola and Jones perform a variance normalization.
-            srfsVector[i] = singleRectangleValue(r, sum) / ( rects[i].area() * std::numeric_limits<unsigned char>::max() );
-        }
-    }
-
-    /**
-     * Sets the value of the SRFS of a sample that will first be variance normalized.
-     */
-    template <typename floating_point_type>
-    void srfs(const cv::Mat & sum, const cv::Mat & squareSum, std::vector<floating_point_type> &srfsVector, const float scale = 1.0f) const
-    {
-        assert(sum.data); //TODO convert into exception?
-
-        const cv::Rect all(0, 0, sum.cols - 1, sum.rows - 1);
-        const float area = all.area();
-        const float mean = singleRectangleValue( all, sum ) / area;
-        const float stdDev = std::sqrt( (singleRectangleValue(all, squareSum) / area) - mean * mean );
-
-        const int dim = dimensions();
-        for (int i = 0; i < dim; ++i)
-        {
-            cv::Rect r = rects[i];
-            r.x *= scale;
-            r.y *= scale;
-            r.height *= scale;
-            r.width  *= scale;
-
-            //Normalized the rectangle value with Viola and Jones method than we bring the value back to the range 0 to 255.
-            float violaJonesNormalizedRectValue = (singleRectangleValue(r, sum) - mean * r.area()) / (2.0f * stdDev);
-            srfsVector[i] = violaJonesNormalizedRectValue / r.area();
-        }
-    }
-
-    /**
-     * Returns the value of this Haar wavelet when applied to an image in a certain position.
-     * If scale > 1, the Haar wavelet streaches right and down.
-     */
-    virtual float value(const cv::Mat & sum, const cv::Mat & squareSum/*, const cv::Mat & tilted*/, const float scale = 1.0f) const;
-
-    /**
      * Reads som data and sets this HaarWavelet with it.
      */
     virtual bool read(std::istream &input);
@@ -136,10 +77,6 @@ public:
     virtual bool write(std::ostream &output) const;
 
 protected:
-    /**
-     * Calculates the sum of pixels inside a rectangular area of the image.
-     */
-    float singleRectangleValue(const cv::Rect &r, const cv::Mat &s) const;
 
     /**
      * Each rectangle and its associated weight of this Haar wavelet
@@ -165,10 +102,9 @@ public:
     MyHaarWavelet(std::vector<cv::Rect> rects_, std::vector<float> weights_);
 
     /**
-     * Returns the value of this Haar wavelet when applied to an image in a certain position.
-     * If scale > 1, the Haar wavelet streaches right and down.
+     * "Raw" constructor for a Haar wavelet.
      */
-    float value(const cv::Mat & sum, const cv::Mat & squareSum/*, const cv::Mat & tilted*/, const float scale = 1.0f) const;
+    MyHaarWavelet(std::vector<cv::Rect> rects_, std::vector<float> weights_, std::vector<float> means_);
 
     /**
      * Reads som data and sets this HaarWavelet with it.
@@ -180,64 +116,18 @@ public:
      */
     bool write(std::ostream &output) const;
 
+    /**
+     * Returns a constant iterator...
+     */
+    std::vector<float>::const_iterator means_begin() const;
+
+    /**
+     * Returns a constant iterator...
+     */
+    const std::vector<float>::const_iterator means_end() const;
+
 protected:
     std::vector<float> means;
 };
-
-
-
-class ViolaJonesHaarWavelet : public HaarWavelet
-{
-public:
-
-    /**
-     * Returns the value of this Haar wavelet when applied to an image in a certain position.
-     * If scale > 1, the Haar wavelet streaches right and down.
-     *
-     * The only normalization mentioned in Pavani et al. is the "intensity normalization" (section 2.3).
-     * Viola and Jones perform a variance normalization that might be more resilient to lightning conditions.
-     * This function implements what Viola and Jones did.
-     */
-    float value(const cv::Mat & sum, const cv::Mat & squareSum/*, const cv::Mat & tilted*/, const float scale = 1.0f) const;
-
-};
-
-
-
-class ViolaJonesNormalizedPavaniHaarWavelet : public HaarWavelet
-{
-public:
-
-    /**
-     * Returns the value of this Haar wavelet when applied to an image in a certain position.
-     * If scale > 1, the Haar wavelet streaches right and down.
-     *
-     * The only normalization mentioned in Pavani et al. is the "intensity normalization" (section 2.3).
-     * Viola and Jones perform a variance normalization that might be more resilient to lightning conditions.
-     * This function implements what Viola and Jones did.
-     */
-    float value(const cv::Mat & sum, const cv::Mat & squareSum/*, const cv::Mat & tilted*/, const float scale = 1.0f) const;
-
-};
-
-
-
-class ViolaJonesNormalizedMyHaarWavelet : public MyHaarWavelet
-{
-public:
-
-    /**
-     * Returns the value of this Haar wavelet when applied to an image in a certain position.
-     * If scale > 1, the Haar wavelet streaches right and down.
-     *
-     * The only normalization mentioned in Pavani et al. is the "intensity normalization" (section 2.3).
-     * Viola and Jones perform a variance normalization that might be more resilient to lightning conditions.
-     * This function implements what Viola and Jones did.
-     */
-    float value(const cv::Mat & sum, const cv::Mat & squareSum/*, const cv::Mat & tilted*/, const float scale = 1.0f) const;
-
-};
-
-
 
 #endif // HAARWAVELET_H
