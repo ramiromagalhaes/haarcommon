@@ -46,7 +46,8 @@ struct IntensityNormalizedWaveletEvaluator : public WaveletEvaluator
      */
     virtual float operator()(const HaarWavelet & w,
                              const cv::Mat & sum,
-                             const float scale = 1.0f)
+                             const cv::Mat &, //Not used here
+                             const float scale = 1.0f) const
     {
         std::vector<float> s(w.dimensions());
         srfs(w, sum, s, scale);
@@ -57,7 +58,8 @@ struct IntensityNormalizedWaveletEvaluator : public WaveletEvaluator
 
     virtual float operator()(const MyHaarWavelet & w,
                              const cv::Mat & sum,
-                             const float scale = 1.0f)
+                             const cv::Mat &, //Not used here
+                             const float scale = 1.0f) const
     {
         std::vector<float> s(w.dimensions());
         srfs(w, sum, s, scale);
@@ -124,7 +126,7 @@ struct VarianceNormalizedWaveletEvaluator : public WaveletEvaluator
     virtual float operator()(const MyHaarWavelet & w,
                              const cv::Mat & sum,
                              const cv::Mat & squareSum/*, const cv::Mat & tilted*/,
-                             const float scale = 1.0f)
+                             const float scale = 1.0f) const
     {
         std::vector<float> s(w.dimensions());
         srfs(w, sum, squareSum, s, scale);

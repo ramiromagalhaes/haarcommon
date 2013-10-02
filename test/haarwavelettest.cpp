@@ -98,7 +98,7 @@ int main()
         IntensityNormalizedWaveletEvaluator evaluator;
         {
             const HaarWavelet wavelet = getHaarWavelet();
-            if (evaluator(wavelet, integralSum) != -0.00392156933f)
+            if (evaluator(wavelet, integralSum, integralSquare) != -0.00392156933f)
             {
                 return 1;
             }
@@ -106,7 +106,7 @@ int main()
 
         {
             const MyHaarWavelet wavelet = getMyWavelet();
-            if (evaluator(wavelet, integralSum) != 0)
+            if (evaluator(wavelet, integralSum, integralSquare) != 0)
             {
                 return 2;
             }
