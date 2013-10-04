@@ -1,9 +1,14 @@
+#define BOOST_TEST_MODULE HaarWaveletTest
+#include <boost/test/unit_test.hpp>
+
 #include <vector>
 #include <opencv2/core/core.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 
-#include "../haarwavelet.h"
-#include "../haarwaveletevaluators.h"
+#include "haarwavelet.h"
+#include "haarwaveletevaluators.h"
+
+
 
 const cv::Mat getMockImage()
 {
@@ -87,49 +92,42 @@ const MyHaarWavelet getMyWavelet()
 
 
 
-int main()
+BOOST_AUTO_TEST_CASE(IntensityNormalizedWaveletEvaluatorTest)
 {
     const cv::Mat image = getMockImage();
     cv::Mat integralSum(6, 6, cv::DataType<double>::type),
             integralSquare(6, 6, cv::DataType<double>::type);
     cv::integral(image, integralSum, integralSquare, cv::DataType<double>::type);
 
+    IntensityNormalizedWaveletEvaluator evaluator;
     {
-        IntensityNormalizedWaveletEvaluator evaluator;
-        {
-            const HaarWavelet wavelet = getHaarWavelet();
-            if (evaluator(wavelet, integralSum, integralSquare) != -0.00392156933f)
-            {
-                return 1;
-            }
-        }
-
-        {
-            const MyHaarWavelet wavelet = getMyWavelet();
-            if (evaluator(wavelet, integralSum, integralSquare) != 0)
-            {
-                return 2;
-            }
-        }
+        const HaarWavelet wavelet = getHaarWavelet();
+        BOOST_CHECK_EQUAL(evaluator(wavelet, integralSum, integralSquare), -0.00392156933f);
     }
 
     {
-        VarianceNormalizedWaveletEvaluator evaluator;
-        {
-            const HaarWavelet wavelet = getHaarWavelet();
-            if (evaluator(wavelet, integralSum, integralSquare) != -0.66815114f)
-            {
-                return 3;
-            }
-        }
-
-        {
-            const MyHaarWavelet wavelet = getMyWavelet();
-            if (evaluator(wavelet, integralSum, integralSquare) != -0.664229572)
-            {
-                return 4;
-            }
-        }
+        const MyHaarWavelet wavelet = getMyWavelet();
+        BOOST_CHECK_EQUAL(evaluator(wavelet, integralSum, integralSquare), 0);
     }
-    return 0;
+}
+
+
+
+BOOST_AUTO_TEST_CASE(VarianceNormalizedWaveletEvaluatorTest)
+{
+    const cv::Mat image = getMockImage();
+    cv::Mat integralSum(6, 6, cv::DataType<double>::type),
+            integralSquare(6, 6, cv::DataType<double>::type);
+    cv::integral(image, integralSum, integralSquare, cv::DataType<double>::type);
+
+    VarianceNormalizedWaveletEvaluator evaluator;
+    {
+        const HaarWavelet wavelet = getHaarWavelet();
+        BOOST_CHECK_EQUAL( evaluator(wavelet, integralSum, integralSquare), -0.66815114f);
+    }
+
+    {
+        const MyHaarWavelet wavelet = getMyWavelet();
+        BOOST_CHECK_EQUAL( evaluator(wavelet, integralSum, integralSquare), -0.664229572f);
+    }
 }

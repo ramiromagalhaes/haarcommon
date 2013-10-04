@@ -1,12 +1,8 @@
-project(haarcommon)
-cmake_minimum_required(VERSION 2.8)
+find_package( Boost  REQUIRED COMPONENTS unit_test_framework )
 
-# Debug and release configurations
-set(CMAKE_CXX_FLAGS_DEBUG   "${CMAKE_CXX_FLAGS_DEBUG} -ggdb -D_DEBUG -Wextra -Wall -pedantic")
-set(CMAKE_CSS_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -Wall")
+include_directories( ${CMAKE_SOURCE_DIR}/src )
 
-find_package( OpenCV REQUIRED COMPONENTS core imgproc highgui)
-find_package( Boost  REQUIRED COMPONENTS system filesystem unit_test_framework )
+add_definitions(-DBOOST_TEST_DYN_LINK)
 
-add_executable( test haarwavelettest.cpp )
-target_link_libraries( test haarcommon ${OpenCV_LIBS} ${Boost_LIBRARIES} )
+add_executable( haarwavelettest haarwavelettest.cpp )
+target_link_libraries( haarwavelettest haarcommon ${OpenCV_LIBS} ${Boost_LIBRARIES} )
