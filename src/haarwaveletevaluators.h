@@ -70,7 +70,7 @@ struct IntensityNormalizedWaveletEvaluator : public WaveletEvaluator
                        std::minus<float>());
 
         return std::inner_product(w.weights_begin(), w.weights_end(),
-                                  s.begin(), 0.0f);
+                                  s.begin(), 0.0f); //TODO NEED AN EVALUATOR WITH ABSOLUTE VALUE.
     }
 
     /**
@@ -137,7 +137,7 @@ struct VarianceNormalizedWaveletEvaluator : public WaveletEvaluator
                        std::minus<float>());
 
         float inner_product = std::inner_product(w.weights_begin(), w.weights_end(),
-                                  s.begin(), 0.0f);
+                                  s.begin(), 0.0f); //TODO NEED AN EVALUATOR WITH ABSOLUTE VALUE.
         return inner_product;
     }
 
