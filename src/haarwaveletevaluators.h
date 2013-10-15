@@ -2,6 +2,7 @@
 #define HAARWAVELETEVALUATORS_H
 
 #include "haarwavelet.h"
+#include <cmath>
 #include <numeric>
 #include <limits>
 
@@ -69,8 +70,8 @@ struct IntensityNormalizedWaveletEvaluator : public WaveletEvaluator
                        s.begin(),
                        std::minus<float>());
 
-        return std::inner_product(w.weights_begin(), w.weights_end(),
-                                  s.begin(), 0.0f); //TODO NEED AN EVALUATOR WITH ABSOLUTE VALUE.
+        return std::abs(std::inner_product(w.weights_begin(), w.weights_end(),
+                                           s.begin(), 0.0f));
     }
 
     /**
@@ -136,9 +137,8 @@ struct VarianceNormalizedWaveletEvaluator : public WaveletEvaluator
                        s.begin(),
                        std::minus<float>());
 
-        float inner_product = std::inner_product(w.weights_begin(), w.weights_end(),
-                                  s.begin(), 0.0f); //TODO NEED AN EVALUATOR WITH ABSOLUTE VALUE.
-        return inner_product;
+        return std::abs(std::inner_product(w.weights_begin(), w.weights_end(),
+                                           s.begin(), 0.0f)); //TODO NEED AN EVALUATOR WITH ABSOLUTE VALUE.
     }
 
     template <typename floating_point_type>
