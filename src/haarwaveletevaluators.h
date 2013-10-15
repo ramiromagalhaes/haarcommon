@@ -97,7 +97,6 @@ struct IntensityNormalizedWaveletEvaluator : public WaveletEvaluator
 
             //SRFS works with normalized means (Pavani et al., 2010, section 2.3).
             //AFAIK, Pavani's classifier only normalized things by the maximum numeric value of each pixel.
-            //Viola and Jones perform a variance normalization.
             srfsVector[i] /= w.rect(i).area() * std::numeric_limits<unsigned char>::max();
         }
     }
@@ -164,6 +163,7 @@ struct VarianceNormalizedWaveletEvaluator : public WaveletEvaluator
             r.height *= scale;
             r.width  *= scale;
 
+            //Viola and Jones perform a variance normalization. This is better explained in Lienhart, Maydt, 2002, section 2.2.
             srfsVector[i] = (singleRectangleValue(r, sum) - mean * r.area()) / (2.0f * stdDev * r.area());
         }
     }
