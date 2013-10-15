@@ -8,6 +8,10 @@
 
 
 
+//TODO It seems possible to better factor those methods with a combination of templates and virtual methods.
+
+
+
 struct WaveletEvaluator
 {
     /**
