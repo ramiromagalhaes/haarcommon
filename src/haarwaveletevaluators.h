@@ -141,7 +141,7 @@ struct VarianceNormalizedWaveletEvaluator : public WaveletEvaluator
                        std::minus<float>());
 
         return std::abs(std::inner_product(w.weights_begin(), w.weights_end(),
-                                           s.begin(), 0.0f)); //TODO NEED AN EVALUATOR WITH ABSOLUTE VALUE.
+                                           s.begin(), 0.0f));
     }
 
     template <typename floating_point_type>
@@ -152,7 +152,7 @@ struct VarianceNormalizedWaveletEvaluator : public WaveletEvaluator
         const cv::Rect all(0, 0, sum.cols - 1, sum.rows - 1);
         const float area = all.area();
         const float mean = singleRectangleValue( all, sum ) / area;
-        const float stdDev = std::sqrt( (singleRectangleValue(all, squareSum) / area) - mean * mean );
+        const float stdDev = std::sqrt( (singleRectangleValue(all, squareSum) / area) - mean * mean ); //TODO review
 
         const int dim = w.dimensions();
         for (int i = 0; i < dim; ++i)
