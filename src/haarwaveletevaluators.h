@@ -123,7 +123,7 @@ struct VarianceNormalizedWaveletEvaluator : public WaveletEvaluator
         srfs(w, sum, squareSum, s, scale);
 
         float inner_product = std::inner_product(w.weights_begin(), w.weights_end(),
-                                  s.begin(), 0.0f);
+                                                 s.begin(), 0.0f);
         return inner_product;
     }
 
