@@ -15,7 +15,11 @@
 struct WaveletEvaluator
 {
     /**
-     * Calculates the sum of pixels inside a rectangular area of the image.
+     * @brief singleRectangleValue Calculates the sum of pixels in a rectangular
+     * region of the image which integral image is s.
+     * @param r the rectangulare region on the original image.
+     * @param s the integral image of the original image.
+     * @return sum of pixels found inside the rectangular region r of the original image.
      */
     //TODO Write documentation about how one should extract rois from the image
     float singleRectangleValue(const cv::Rect &r, const cv::Mat & s) const
@@ -81,6 +85,10 @@ struct IntensityNormalizedWaveletEvaluator : public WaveletEvaluator
     /**
      * Sets the values of the single rectangle feature space.
      * If scale > 1, the Haar wavelet streaches right and down.
+     * @param w
+     * @param sum integral image of the original image.
+     * @param srfsVector where the resulting values will be writen to. srfsVector.size() must be equal to w.dimensions().
+     * @param scale how mutch w should be scaled.
      */
     template <typename floating_point_type>
     void srfs(const HaarWavelet & w, const cv::Mat & sum, std::vector<floating_point_type> &srfsVector, const float scale = 1.0f) const
