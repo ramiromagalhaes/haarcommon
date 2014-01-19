@@ -3,6 +3,31 @@
 
 
 
+//======================================== AbstractHaarWavelet ========================================
+
+
+
+unsigned int AbstractHaarWavelet::dimensions() const
+{
+    return rects.size();
+}
+
+std::vector<cv::Rect>::const_iterator AbstractHaarWavelet::rects_begin() const
+{
+    return rects.begin();
+}
+
+const std::vector<cv::Rect>::const_iterator AbstractHaarWavelet::rects_end() const
+{
+    return rects.end();
+}
+
+
+
+//======================================== HaarWavelet ========================================
+
+
+
 HaarWavelet::HaarWavelet() {}
 
 HaarWavelet::HaarWavelet(std::vector<cv::Rect> rects_,
@@ -12,15 +37,6 @@ HaarWavelet::HaarWavelet(std::vector<cv::Rect> rects_,
     rects = rects_;
     weights = weights_;
 }
-
-
-
-unsigned int HaarWavelet::dimensions() const
-{
-    return (int)rects.size();
-}
-
-
 
 bool HaarWavelet::read(std::istream &input)
 {
@@ -44,8 +60,6 @@ bool HaarWavelet::read(std::istream &input)
 
     return true;
 }
-
-
 
 /**
  * See also constructor that takes a std::istream.
@@ -80,24 +94,10 @@ bool HaarWavelet::write(std::ostream &output) const
     return true;
 }
 
-
-
-std::vector<cv::Rect>::const_iterator HaarWavelet::rects_begin() const
-{
-    return rects.begin();
-}
-
-const std::vector<cv::Rect>::const_iterator HaarWavelet::rects_end() const
-{
-    return rects.end();
-}
-
 const cv::Rect HaarWavelet::rect(const int index) const
 {
     return rects[index];
 }
-
-
 
 std::vector<float>::const_iterator HaarWavelet::weights_begin() const
 {
@@ -174,4 +174,95 @@ std::vector<float>::const_iterator MyHaarWavelet::means_begin() const
 const std::vector<float>::const_iterator MyHaarWavelet::means_end() const
 {
     return means.end();
+}
+
+
+
+//======================================== DualWeightHaarWavelet ========================================
+
+
+
+DualWeightHaarWavelet::DualWeightHaarWavelet() {}
+
+DualWeightHaarWavelet::DualWeightHaarWavelet(const DualWeightHaarWavelet &w)
+{
+    rects = w.rects;
+    weightsPositive = w.weightsPositive;
+    weightsNegative = w.weightsNegative;
+}
+
+std::vector<float>::const_iterator DualWeightHaarWavelet::weightsPositive_begin() const
+{
+    return weightsPositive.begin();
+}
+
+const std::vector<float>::const_iterator DualWeightHaarWavelet::weightsPositive_end() const
+{
+    return weightsPositive.end();
+}
+
+std::vector<float>::const_iterator DualWeightHaarWavelet::weightsNegative_begin() const
+{
+    return weightsNegative.begin();
+}
+
+const std::vector<float>::const_iterator DualWeightHaarWavelet::weightsNegative_end() const
+{
+    return weightsNegative.end();
+}
+
+bool DualWeightHaarWavelet::read(std::istream &input)
+{
+    int rectangles;
+    input >> rectangles;
+
+    for (int i = 0; i < rectangles; i++)
+    {
+        float weight_p, weight_n;
+        cv::Rect rect_;
+
+        input >> rect_.x
+              >> rect_.y
+              >> rect_.width
+              >> rect_.height
+              >> weight_p
+              >> weight_n;
+
+        rects.push_back(rect_);
+        weightsPositive.push_back(weight_p);
+        weightsNegative.push_back(weight_n);
+    }
+
+    return true;
+}
+
+bool DualWeightHaarWavelet::write(std::ostream &output) const
+{
+    if (dimensions() == 0) //won't store a meaningless wavelet
+    {
+        return false;
+    }
+
+    output << dimensions() << ' ';
+
+    bool first = true;
+    for (unsigned int i = 0; i < dimensions(); i++)
+    {
+        if (first)
+        {
+            first = false;
+        }
+        else
+        {
+            output << ' ';
+        }
+        output << rects[i].x << ' '
+               << rects[i].y << ' '
+               << rects[i].width << ' '
+               << rects[i].height << ' '
+               << weightsPositive[i] << ' '
+               << weightsNegative[i];
+    }
+
+    return true;
 }

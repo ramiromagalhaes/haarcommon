@@ -9,22 +9,10 @@
 
 
 
-/**
- * @brief The HaarWavelet class represents a single Haar wavelet.
- */
-class HaarWavelet
+class AbstractHaarWavelet
 {
 public:
-
-    /**
-     * Constructs an "empty" instance of this object.
-     */
-    HaarWavelet();
-
-    /**
-     * "Raw" constructor for a Haar wavelet.
-     */
-    HaarWavelet(std::vector<cv::Rect> rects_, std::vector<float> weights_);
+    ~AbstractHaarWavelet() {}
 
     /**
      * Amount of rectangles this Haar wavelet has
@@ -40,6 +28,43 @@ public:
      * Returns a constant iterator to the end of the collection of rectangles that compose this wavelet.
      */
     const std::vector<cv::Rect>::const_iterator rects_end() const;
+
+    /**
+     * Reads som data and sets this HaarWavelet with it.
+     */
+    virtual bool read(std::istream &input) =0;
+
+    /**
+     * Writes this Haar wavelet into the given std::ostream.
+     */
+    virtual bool write(std::ostream &output) const =0;
+
+protected:
+
+    /**
+     * This wavelet rectangles.
+     */
+    std::vector<cv::Rect> rects;
+};
+
+
+
+/**
+ * @brief The HaarWavelet class represents a single Haar wavelet.
+ */
+class HaarWavelet : public AbstractHaarWavelet
+{
+public:
+
+    /**
+     * Constructs an "empty" instance of this object.
+     */
+    HaarWavelet();
+
+    /**
+     * "Raw" constructor for a Haar wavelet.
+     */
+    HaarWavelet(std::vector<cv::Rect> rects_, std::vector<float> weights_);
 
     /**
      * Returns the cv::Rect at position 'index'.
@@ -79,9 +104,8 @@ public:
 protected:
 
     /**
-     * Each rectangle and its associated weight of this Haar wavelet
+     * Weights associated with each rectangle.
      */
-    std::vector<cv::Rect> rects;
     std::vector<float> weights;
 };
 
@@ -129,5 +153,55 @@ public:
 protected:
     std::vector<float> means;
 };
+
+
+
+/**
+ * @brief The HaarWavelet class represents a single Haar wavelet.
+ */
+class DualWeightHaarWavelet : public AbstractHaarWavelet
+{
+public:
+
+    /**
+     * Constructs an "empty" instance of this object.
+     */
+    DualWeightHaarWavelet();
+
+    /**
+     * Copies all data from another DualWeightHaarWavelet object into this object.
+     */
+    DualWeightHaarWavelet(const DualWeightHaarWavelet &w);
+
+    std::vector<float>::const_iterator weightsPositive_begin() const;
+    const std::vector<float>::const_iterator weightsPositive_end() const;
+
+    std::vector<float>::const_iterator weightsNegative_begin() const;
+    const std::vector<float>::const_iterator weightsNegative_end() const;
+
+    /**
+     * Reads som data and sets this HaarWavelet with it.
+     */
+    virtual bool read(std::istream &input);
+
+    /**
+     * Writes this Haar wavelet into the given std::ostream.
+     */
+    virtual bool write(std::ostream &output) const;
+
+protected:
+
+    /**
+     * Weights associated with the positive samples.
+     */
+    std::vector<float> weightsPositive;
+
+    /**
+     * Weights associated with the positive samples.
+     */
+    std::vector<float> weightsNegative;
+};
+
+
 
 #endif // HAARWAVELET_H

@@ -8,7 +8,7 @@
 
 
 
-//TODO It seems possible to better factor those methods with a combination of templates and virtual methods.
+//TODO It seems possible to better factor those methods with a combination of templates and virtual methods. Consider traits or policies. http://stackoverflow.com/questions/14718055/what-is-the-difference-between-a-trait-and-a-policy
 
 
 
@@ -82,6 +82,24 @@ struct IntensityNormalizedWaveletEvaluator : public WaveletEvaluator
                                            s.begin(), 0.0f));
     }
 
+    virtual std::pair<float,float> operator()(const DualWeightHaarWavelet & w,
+                                              const cv::Mat & sum,
+                                              const cv::Mat &, //Not used here
+                                              const float scale = 1.0f) const
+    {
+        std::vector<float> s(w.dimensions());
+        srfs(w, sum, s, scale);
+
+        std::pair<float, float> featureValues;
+        featureValues.first  = std::inner_product(w.weightsPositive_begin(),
+                                                  w.weightsPositive_end(),
+                                                  s.begin(), 0.0f);
+        featureValues.second = std::inner_product(w.weightsNegative_begin(),
+                                                  w.weightsNegative_end(),
+                                                  s.begin(), 0.0f);
+        return featureValues;
+    }
+
     /**
      * Sets the values of the single rectangle feature space.
      * If scale > 1, the Haar wavelet streaches right and down.
@@ -91,12 +109,12 @@ struct IntensityNormalizedWaveletEvaluator : public WaveletEvaluator
      * @param scale how mutch w should be scaled.
      */
     template <typename floating_point_type>
-    void srfs(const HaarWavelet & w, const cv::Mat & sum, std::vector<floating_point_type> &srfsVector, const float scale = 1.0f) const
+    void srfs(const AbstractHaarWavelet & w, const cv::Mat & sum, std::vector<floating_point_type> &srfsVector, const float scale = 1.0f) const
     {
-        const int dim = w.dimensions();
-        for (int i = 0; i < dim; ++i)
+        int i = 0;
+        for (std::vector<cv::Rect>::const_iterator it = w.rects_begin(); it != w.rects_end(); ++it)
         {
-            cv::Rect r = w.rect(i);
+            cv::Rect r = *it;
             r.x *= scale;
             r.y *= scale;
             r.height *= scale;
@@ -105,7 +123,8 @@ struct IntensityNormalizedWaveletEvaluator : public WaveletEvaluator
 
             //SRFS works with normalized means (Pavani et al., 2010, section 2.3).
             //AFAIK, Pavani's classifier only normalized things by the maximum numeric value of each pixel.
-            srfsVector[i] /= w.rect(i).area() * std::numeric_limits<unsigned char>::max();
+            srfsVector[i] /= it->area() * std::numeric_limits<unsigned char>::max();
+            ++i;
         }
     }
 };
