@@ -8,7 +8,8 @@
 
 
 
-//TODO It seems possible to better factor those methods with a combination of templates and virtual methods. Consider traits or policies. http://stackoverflow.com/questions/14718055/what-is-the-difference-between-a-trait-and-a-policy
+//TODO It seems possible to better factor those methods with a combination of templates and virtual methods.
+//Consider traits or policies. http://stackoverflow.com/questions/14718055/what-is-the-difference-between-a-trait-and-a-policy
 
 
 
