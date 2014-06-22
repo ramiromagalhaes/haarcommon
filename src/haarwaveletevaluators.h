@@ -173,7 +173,7 @@ struct VarianceNormalizedWaveletEvaluator : public WaveletEvaluator
     }
 
     template <typename floating_point_type>
-    void srfs(const HaarWavelet & w, const cv::Mat & sum, const cv::Mat & squareSum, std::vector<floating_point_type> &srfsVector, const float scale = 1.0f) const
+    void srfs(const AbstractHaarWavelet & w, const cv::Mat & sum, const cv::Mat & squareSum, std::vector<floating_point_type> &srfsVector, const float scale = 1.0f) const
     {
         assert(sum.data); //TODO convert into exception?
 
@@ -182,10 +182,10 @@ struct VarianceNormalizedWaveletEvaluator : public WaveletEvaluator
         const float mean = singleRectangleValue( all, sum ) / area;
         const float stdDev = std::sqrt( (singleRectangleValue(all, squareSum) / area) - mean * mean ); //TODO review
 
-        const int dim = w.dimensions();
-        for (int i = 0; i < dim; ++i)
+        int i = 0;
+        for(std::vector<cv::Rect>::const_iterator it = w.rects_begin(); it != w.rects_end(); ++it, ++i)
         {
-            cv::Rect r = w.rect(i);
+            cv::Rect r = *it;
             r.x *= scale;
             r.y *= scale;
             r.height *= scale;
