@@ -124,7 +124,7 @@ struct IntensityNormalizedWaveletEvaluator : public WaveletEvaluator
 
             //SRFS works with normalized means (Pavani et al., 2010, section 2.3).
             //AFAIK, Pavani's classifier only normalized things by the maximum numeric value of each pixel.
-            srfsVector[i] /= it->area() * std::numeric_limits<unsigned char>::max();
+            srfsVector[i] /= it->area() * std::numeric_limits<unsigned char>::max(); //TODO it is probably best to use a fixed number
             ++i;
         }
     }
@@ -177,10 +177,12 @@ struct VarianceNormalizedWaveletEvaluator : public WaveletEvaluator
     {
         assert(sum.data); //TODO convert into exception?
 
-        const cv::Rect all(0, 0, sum.cols - 1, sum.rows - 1);
-        const float area = all.area();
-        const float mean = singleRectangleValue( all, sum ) / area;
-        const float stdDev = std::sqrt( (singleRectangleValue(all, squareSum) / area) - mean * mean ); //TODO review
+        const float area = (sum.cols - 1) * (sum.rows - 1); //area of the original image
+        const float mean = sum.at<double>(sum.rows - 1, sum.cols - 1) / area; //mean value of all pixels inside the image that originated "sum"
+        const float stdDev = std::sqrt( std::abs((squareSum.at<double>(sum.rows - 1, sum.cols - 1) / area ) - mean * mean) ); //Viola and Jones' paper show a wrong equation!
+                                                                                                                  //Correct is: STD_DEV = SQRT(E[X^2] - E[X]^2)
+                                                                                                                  //TODO What if the value inside is negative??? Is it ok to use std::abs?
+                                                                                                                  //TODO unbiased estimation is a little different (in this case it should be (area - 1) )
 
         int i = 0;
         for(std::vector<cv::Rect>::const_iterator it = w.rects_begin(); it != w.rects_end(); ++it, ++i)
@@ -192,7 +194,7 @@ struct VarianceNormalizedWaveletEvaluator : public WaveletEvaluator
             r.width  *= scale;
 
             //Viola and Jones perform a variance normalization. This is better explained in Lienhart, Maydt, 2002, section 2.2.
-            srfsVector[i] = (singleRectangleValue(r, sum) - mean * r.area()) / (2.0f * stdDev * r.area());
+            srfsVector[i] = (singleRectangleValue(r, sum) - mean * r.area()) / (2.0f * stdDev);
         }
     }
 };
