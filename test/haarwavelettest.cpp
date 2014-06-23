@@ -124,11 +124,11 @@ BOOST_AUTO_TEST_CASE(VarianceNormalizedWaveletEvaluatorTest)
     VarianceNormalizedWaveletEvaluator evaluator;
     {
         const HaarWavelet wavelet = getHaarWavelet();
-        BOOST_CHECK_EQUAL( evaluator(wavelet, integralSum, integralSquare), -0.66815114f);
+        BOOST_CHECK_CLOSE( evaluator(wavelet, integralSum, integralSquare), -0.0689201209f, 0.0001f);
     }
 
     {
         const MyHaarWavelet wavelet = getMyWavelet();
-        BOOST_CHECK_EQUAL( evaluator(wavelet, integralSum, integralSquare), 0.664229572f);
+        BOOST_CHECK_CLOSE( evaluator(wavelet, integralSum, integralSquare), 0.664229572f, 0.0001f);
     }
 }
