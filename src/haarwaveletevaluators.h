@@ -19,7 +19,7 @@ struct WaveletEvaluator
      * @brief singleRectangleValue Calculates the sum of pixels in a rectangular
      * region of the image which integral image is s.
      * @param r the rectangulare region on the original image.
-     * @param s the integral image of the original image.
+     * @param s the integral image of the original image. It may be the simple sum or the squared sum.
      * @return sum of pixels found inside the rectangular region r of the original image.
      */
     //TODO Write documentation about how one should extract rois from the image
