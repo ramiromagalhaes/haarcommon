@@ -57,7 +57,7 @@ struct IntensityNormalizedWaveletEvaluator : public WaveletEvaluator
     virtual float operator()(const HaarWavelet & w,
                              const cv::Mat & sum,
                              const cv::Mat &, //Not used here
-                             const float scale = 1.0f) const
+                             const float scale = 1.0) const
     {
         std::vector<float> s(w.dimensions());
         srfs(w, sum, s, scale);
@@ -69,7 +69,7 @@ struct IntensityNormalizedWaveletEvaluator : public WaveletEvaluator
     virtual float operator()(const MyHaarWavelet & w,
                              const cv::Mat & sum,
                              const cv::Mat &, //Not used here
-                             const float scale = 1.0f) const
+                             const float scale = 1.0) const
     {
         std::vector<float> s(w.dimensions());
         srfs(w, sum, s, scale);
@@ -86,7 +86,7 @@ struct IntensityNormalizedWaveletEvaluator : public WaveletEvaluator
     virtual std::pair<float,float> operator()(const DualWeightHaarWavelet & w,
                                               const cv::Mat & sum,
                                               const cv::Mat &, //Not used here
-                                              const float scale = 1.0f) const
+                                              const float scale = 1.0) const
     {
         std::vector<float> s(w.dimensions());
         srfs(w, sum, s, scale);
@@ -110,7 +110,7 @@ struct IntensityNormalizedWaveletEvaluator : public WaveletEvaluator
      * @param scale how mutch w should be scaled.
      */
     template <typename floating_point_type>
-    void srfs(const AbstractHaarWavelet & w, const cv::Mat & sum, std::vector<floating_point_type> &srfsVector, const float scale = 1.0f) const
+    void srfs(const AbstractHaarWavelet & w, const cv::Mat & sum, std::vector<floating_point_type> &srfsVector, const float scale = 1.0) const
     {
         int i = 0;
         for (std::vector<cv::Rect>::const_iterator it = w.rects_begin(); it != w.rects_end(); ++it)
@@ -145,7 +145,7 @@ struct VarianceNormalizedWaveletEvaluator : public WaveletEvaluator
     virtual float operator()(const HaarWavelet & w,
                              const cv::Mat & sum,
                              const cv::Mat & squareSum/*, const cv::Mat & tilted*/,
-                             const float scale = 1.0f) const
+                             const float scale = 1.0) const
     {
         std::vector<float> s(w.dimensions());
         srfs(w, sum, squareSum, s, scale);
@@ -158,7 +158,7 @@ struct VarianceNormalizedWaveletEvaluator : public WaveletEvaluator
     virtual float operator()(const MyHaarWavelet & w,
                              const cv::Mat & sum,
                              const cv::Mat & squareSum/*, const cv::Mat & tilted*/,
-                             const float scale = 1.0f) const
+                             const float scale = 1.0) const
     {
         std::vector<float> s(w.dimensions());
         srfs(w, sum, squareSum, s, scale);
@@ -169,20 +169,21 @@ struct VarianceNormalizedWaveletEvaluator : public WaveletEvaluator
                        std::minus<float>());
 
         return std::abs(std::inner_product(w.weights_begin(), w.weights_end(),
-                                           s.begin(), 0.0f));
+                                           s.begin(), 0.0));
     }
 
     template <typename floating_point_type>
-    void srfs(const AbstractHaarWavelet & w, const cv::Mat & sum, const cv::Mat & squareSum, std::vector<floating_point_type> &srfsVector, const float scale = 1.0f) const
+    void srfs(const AbstractHaarWavelet & w, const cv::Mat & sum, const cv::Mat & squareSum, std::vector<floating_point_type> &srfsVector, const float scale = 1.0) const
     {
-        assert(sum.data); //TODO convert into exception?
+        assert(sum.data);       //TODO convert into exception?
+        assert(squareSum.data); //TODO convert into exception?
 
-        const float area = (sum.cols - 1) * (sum.rows - 1); //area of the original image
-        const float mean = sum.at<double>(sum.rows - 1, sum.cols - 1) / area; //mean value of all pixels inside the image that originated "sum"
-        const float stdDev = std::sqrt( std::abs((squareSum.at<double>(sum.rows - 1, sum.cols - 1) / area ) - mean * mean) ); //Viola and Jones' paper show a wrong equation!
-                                                                                                                  //Correct is: STD_DEV = SQRT(E[X^2] - E[X]^2)
-                                                                                                                  //TODO What if the value inside is negative??? Is it ok to use std::abs?
-                                                                                                                  //TODO unbiased estimation is a little different (in this case it should be (area - 1) )
+        const double area = (sum.cols - 1) * (sum.rows - 1); //area of the original image
+        const double mean = sum.at<double>(sum.rows - 1, sum.cols - 1) / area; //mean value of all pixels inside the image that originated "sum"
+        const double stdDev = std::sqrt( std::abs(
+                            (squareSum.at<double>(sum.rows - 1, sum.cols - 1) / area ) - (mean * mean)
+                        )); //Viola and Jones' paper show a wrong equation?
+                            //Correct is: STD_DEV = SQRT(E[X^2] - E[X]^2)
 
         int i = 0;
         for(std::vector<cv::Rect>::const_iterator it = w.rects_begin(); it != w.rects_end(); ++it, ++i)
@@ -194,7 +195,16 @@ struct VarianceNormalizedWaveletEvaluator : public WaveletEvaluator
             r.width  *= scale;
 
             //Viola and Jones perform a variance normalization. This is better explained in Lienhart, Maydt, 2002, section 2.2.
-            srfsVector[i] = (singleRectangleValue(r, sum) - mean * r.area()) / (2.0f * stdDev);
+            if (stdDev)
+            {
+                srfsVector[i] = (singleRectangleValue(r, sum) - mean * r.area()) / (2.0 * stdDev);
+            }
+            else
+            {
+                //Can't divide by zero. If the image standard deviation is 0, then all rectangles have the same value.
+                //If this happens, then (singleRectangleValue(r, sum) - mean * r.area()) == 0.
+                srfsVector[i] = 0;
+            }
         }
     }
 };
