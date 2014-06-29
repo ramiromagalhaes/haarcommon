@@ -22,7 +22,6 @@ struct WaveletEvaluator
      * @param s the integral image of the original image. It may be the simple sum or the squared sum.
      * @return sum of pixels found inside the rectangular region r of the original image.
      */
-    //TODO Write documentation about how one should extract rois from the image
     float singleRectangleValue(const cv::Rect &r, const cv::Mat & s) const
     {
         if (s.type() != cv::DataType<double>::type)
@@ -175,36 +174,33 @@ struct VarianceNormalizedWaveletEvaluator : public WaveletEvaluator
     template <typename floating_point_type>
     void srfs(const AbstractHaarWavelet & w, const cv::Mat & sum, const cv::Mat & squareSum, std::vector<floating_point_type> &srfsVector, const float scale = 1.0) const
     {
-        assert(sum.data);       //TODO convert into exception?
-        assert(squareSum.data); //TODO convert into exception?
-
+        //Viola and Jones perform a variance normalization. This is better explained in Lienhart, Maydt, 2002, section 2.2.
         const double area = (sum.cols - 1) * (sum.rows - 1); //area of the original image
-        const double mean = sum.at<double>(sum.rows - 1, sum.cols - 1) / area; //mean value of all pixels inside the image that originated "sum"
+        const double mean = sum.at<double>(sum.rows - 1, sum.cols - 1) / area; //mean value of all pixels inside the image that originated the integral image
         const double stdDev = std::sqrt( std::abs(
                             (squareSum.at<double>(sum.rows - 1, sum.cols - 1) / area ) - (mean * mean)
                         )); //Viola and Jones' paper show a wrong equation?
                             //Correct is: STD_DEV = SQRT(E[X^2] - E[X]^2)
 
-        int i = 0;
-        for(std::vector<cv::Rect>::const_iterator it = w.rects_begin(); it != w.rects_end(); ++it, ++i)
+        if (stdDev)
         {
-            cv::Rect r = *it;
-            r.x *= scale;
-            r.y *= scale;
-            r.height *= scale;
-            r.width  *= scale;
+            int i = 0;
+            for(std::vector<cv::Rect>::const_iterator it = w.rects_begin(); it != w.rects_end(); ++it, ++i)
+            {
+                cv::Rect r = *it;
+                r.x *= scale;
+                r.y *= scale;
+                r.height *= scale;
+                r.width  *= scale;
 
-            //Viola and Jones perform a variance normalization. This is better explained in Lienhart, Maydt, 2002, section 2.2.
-            if (stdDev)
-            {
-                srfsVector[i] = (singleRectangleValue(r, sum) - mean * r.area()) / (2.0 * stdDev);
+                //Can't divide by zero. If the subwindow standard deviation is 0, then all rectangles have the same value.
+                //If this happens, then (singleRectangleValue(r, sum) - mean * r.area()) == 0. See the ELSE clause below.
+                srfsVector[i] = (singleRectangleValue(r, sum) - (mean * r.area())) / (2.0 * stdDev);
             }
-            else
-            {
-                //Can't divide by zero. If the image standard deviation is 0, then all rectangles have the same value.
-                //If this happens, then (singleRectangleValue(r, sum) - mean * r.area()) == 0.
-                srfsVector[i] = 0;
-            }
+        }
+        else
+        {
+            std::fill(srfsVector.begin(), srfsVector.end(), .0);
         }
     }
 };
