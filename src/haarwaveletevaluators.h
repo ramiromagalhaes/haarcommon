@@ -22,14 +22,14 @@ struct WaveletEvaluator
      * @param s the integral image of the original image. It may be the simple sum or the squared sum.
      * @return sum of pixels found inside the rectangular region r of the original image.
      */
-    float singleRectangleValue(const cv::Rect &r, const cv::Mat & s) const
+    double singleRectangleValue(const cv::Rect &r, const cv::Mat & s) const
     {
         if (s.type() != cv::DataType<double>::type)
         {
             throw 31;
         }
 
-        float rectVal = 0;
+        double rectVal = .0;
 
         //As per Lienhart, Maydt, 2002, section 2.2
         const int x_w = r.x + r.width;
