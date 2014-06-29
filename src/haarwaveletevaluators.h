@@ -62,7 +62,7 @@ struct IntensityNormalizedWaveletEvaluator : public WaveletEvaluator
         srfs(w, sum, s, scale);
 
         return std::inner_product(w.weights_begin(), w.weights_end(),
-                                  s.begin(), 0.0f);
+                                  s.begin(), 0.0);
     }
 
     virtual float operator()(const MyHaarWavelet & w,
@@ -79,7 +79,7 @@ struct IntensityNormalizedWaveletEvaluator : public WaveletEvaluator
                        std::minus<float>());
 
         return std::abs(std::inner_product(w.weights_begin(), w.weights_end(),
-                                           s.begin(), 0.0f));
+                                           s.begin(), 0.0));
     }
 
     virtual std::pair<float,float> operator()(const DualWeightHaarWavelet & w,
@@ -93,10 +93,10 @@ struct IntensityNormalizedWaveletEvaluator : public WaveletEvaluator
         std::pair<float, float> featureValues;
         featureValues.first  = std::inner_product(w.weightsPositive_begin(),
                                                   w.weightsPositive_end(),
-                                                  s.begin(), 0.0f);
+                                                  s.begin(), 0.0);
         featureValues.second = std::inner_product(w.weightsNegative_begin(),
                                                   w.weightsNegative_end(),
-                                                  s.begin(), 0.0f);
+                                                  s.begin(), 0.0);
         return featureValues;
     }
 
@@ -149,9 +149,8 @@ struct VarianceNormalizedWaveletEvaluator : public WaveletEvaluator
         std::vector<float> s(w.dimensions());
         srfs(w, sum, squareSum, s, scale);
 
-        float inner_product = std::inner_product(w.weights_begin(), w.weights_end(),
-                                                 s.begin(), 0.0f);
-        return inner_product;
+        return std::inner_product(w.weights_begin(), w.weights_end(),
+                                  s.begin(), 0.0);
     }
 
     virtual float operator()(const MyHaarWavelet & w,
