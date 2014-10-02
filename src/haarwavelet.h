@@ -62,6 +62,11 @@ public:
     HaarWavelet();
 
     /**
+     * Destroys a HaarWavelet.
+     */
+    ~HaarWavelet() {}
+
+    /**
      * "Raw" constructor for a Haar wavelet.
      */
     HaarWavelet(std::vector<cv::Rect> rects_, std::vector<float> weights_);
@@ -121,6 +126,11 @@ public:
     MyHaarWavelet();
 
     /**
+     * Destroys this instance of MyHaarWavelet.
+     */
+    ~MyHaarWavelet() {}
+
+    /**
      * "Raw" constructor for a Haar wavelet.
      */
     MyHaarWavelet(std::vector<cv::Rect> rects_, std::vector<float> weights_);
@@ -167,6 +177,11 @@ public:
      * Constructs an "empty" instance of this object.
      */
     DualWeightHaarWavelet();
+
+    /**
+     * Destroys this instance of MyHaarWavelet.
+     */
+    ~DualWeightHaarWavelet() {}
 
     /**
      * Copies all data from another DualWeightHaarWavelet object into this object.
